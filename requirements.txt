@@ -1,0 +1,11 @@
+numpy
+scipy
+pandas
+matplotlib
+scikit-learn
+torch
+PyYAML
+ucimlrepo
+datasets
+nonlinear-benchmarks
+reservoirpy

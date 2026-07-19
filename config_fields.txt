@@ -1,0 +1,314 @@
+RPM base config fields
+
+======================
+
+These configs are single-layer RPM/RFM runs with kernel_sigma: [0.5] and normalize_features: false.
+
+Run examples:
+
+  python train_rpm.py config_agop.yaml
+
+  python train_rpm.py config_gradient_fixed_readout.yaml
+
+  python train_rpm.py config_foof_fixed_readout.yaml
+
+
+experiment_dir
+
+  Directory where run artifacts, logger files, and run metadata are saved.
+
+logger_filename
+
+  Filename for the torch-saved Logger object.
+
+logger_run_meta_filename
+
+  Filename for the YAML copy of run-level metadata/config.
+
+num_trials
+
+  Number of independent trials to run.
+
+train_num_epochs
+
+  Number of metric-update epochs after the epoch-0 identity baseline.
+
+num_train_samples
+
+  Number of Mackey-Glass training samples.
+
+num_val_samples
+
+  Number of validation samples split from the training/validation pool.
+
+num_test_samples
+
+  Number of test samples.
+
+num_lags
+
+  Input window length / number of lagged samples.
+
+prediction_horizon
+
+  Prediction horizon pH used by dspTools.createInputs.
+
+embedding_size
+
+  Reserved data embedding setting; retained for compatibility.
+
+wgn_var
+
+  Noise setting passed to Mackey-Glass data creation.
+
+test_ratio
+
+  Test ratio field passed through the Mackey-Glass system_info dictionary.
+
+output_dim
+
+  List of spectral feature dimensions, one value per RPM layer. Single-layer configs use [500].
+
+alphas
+
+  List of metric update rates, one value per RPM layer.
+
+kernel_type
+
+  Radial kernel family. Supported values include rbf/gaussian and laplacian/laplace aliases.
+
+kernel_sigma
+
+  List of kernel bandwidths/length-scales, one per layer. These configs use [0.5].
+
+approx_method
+
+  Spectral feature mode: full or nystrom.
+
+nystrom_m
+
+  Number of Nyström landmarks when approx_method is nystrom.
+
+nystrom_mode
+
+  Nyström landmark sampling mode, e.g. uniform, weighted, or first depending on speed_refac support.
+
+nystrom_seed
+
+  Random seed for Nyström landmark selection.
+
+chunk_size
+
+  Chunk size for kernel/feature computations to control memory.
+
+store_full_centers
+
+  Whether TorchSpecNystrom stores full centers when quantization is applied.
+
+center_quant_thresh
+
+  Optional threshold for Mahalanobis center quantization; null disables it.
+
+normalize_features
+
+  Whether layer features are normalized by the kernel feature normalizer during training/evaluation. Requested configs set false.
+
+metric_clamp
+
+  Eigenvalue floor used when projecting metrics to PSD.
+
+metric_rank_eps
+
+  Relative eigenvalue cutoff used when factorizing PSD metrics for Mahalanobis distances.
+
+metric_norm_type
+
+  Post-update metric normalization: Trace, Frob, or null.
+
+metric_norm_mult
+
+  Multiplier for the selected metric normalization. Trace normalization targets mult * dimension.
+
+metric_eps
+
+  Small epsilon for metric normalization and numerical protection.
+
+reg_param
+
+  Ridge/MMSE readout regularization parameter.
+
+use_onehot_labels
+
+  If true, train_regressor expects one-hot/multi-output labels; false for scalar regression.
+
+batch_size
+
+  Batch size used for metric updates. With num_batches=1 and 2000 samples this uses the full training set.
+
+num_batches
+
+  Number of batches per epoch used to accumulate metric-update information.
+
+effective_dim_eps
+
+  Regularization/epsilon used for effective-dimension logging.
+
+nmse_eps
+
+  Epsilon used when computing normalized MSE.
+
+dtype
+
+  Torch dtype as a string, usually float64 or float32.
+
+device
+
+  Torch device string, e.g. cpu or cuda.
+
+enable_epoch_print
+
+  Whether to print train/val/test MSE each epoch.
+
+metric_update_rule
+
+  Metric update rule owned by RPM: agop, gradient_descent, or foof.
+
+center_grads
+
+  AGOP option: center layer-input gradients before forming AGOP.
+
+metric_gradient_objective
+
+  Gradient-descent objective. fixed_readout holds the current readout fixed; full_mmse differentiates through the closed-form readout solve.
+
+metric_gradient_optimizer
+
+  Optimizer for direct metric-gradient updates: sgd or adam.
+
+metric_gradient_lrs
+
+  Optional per-layer learning rates for direct metric-gradient updates. null falls back to alphas.
+
+metric_gradient_loss
+
+  Loss used by direct metric-gradient updates. Current path supports mse.
+
+metric_gradient_eps
+
+  Epsilon for gradient sanitization/clipping.
+
+metric_gradient_project_psd
+
+  Whether to PSD-project metrics after a direct gradient update.
+
+metric_gradient_max_norm
+
+  Maximum Frobenius norm for raw metric gradients; null/0 disables clipping if supported.
+
+metric_gradient_diag_load
+
+  Diagonal loading added after direct gradient update before projection/normalization.
+
+metric_gradient_use_current_readout
+
+  If true, fixed_readout objective detaches and uses the current trained readout.
+
+metric_gradient_store_differentiable_readout
+
+  For full_mmse, optionally store the differentiable readout computed inside the update.
+
+metric_gradient_adam_beta1
+
+  Adam beta1 for direct metric-gradient updates.
+
+metric_gradient_adam_beta2
+
+  Adam beta2 for direct metric-gradient updates.
+
+metric_gradient_adam_eps
+
+  Adam epsilon for direct metric-gradient updates.
+
+foof_optimizer
+
+  Optimizer for FOOF factor-direction updates: sgd/gd or adam.
+
+foof_lrs
+
+  Optional per-layer FOOF learning rates. null falls back to alphas.
+
+foof_gamma
+
+  Ridge parameter in the FOOF solve Z.T @ Z + gamma I (or covariance-scaled version).
+
+foof_loss
+
+  Scalar loss used to backpropagate to transformed layer inputs S. Current path supports mse.
+
+foof_eps
+
+  Epsilon for FOOF solves, clipping, and postprocessing.
+
+foof_covariance_normalize
+
+  If true, use Z.T @ Z / N + gamma I; if false, use Z.T @ Z + gamma I.
+
+foof_factor_rank
+
+  Rank of factor W recovered from M for FOOF. null uses full rank; integer/list enables low-rank factors.
+
+foof_max_direction_norm
+
+  Maximum norm for the FOOF direction before optimizer step; null disables clipping.
+
+foof_project_psd
+
+  Whether to PSD-project M = W.T @ W after the FOOF step.
+
+foof_diag_load
+
+  Diagonal loading added during FOOF metric postprocessing.
+
+foof_eigenclip_max
+
+  Optional maximum eigenvalue for FOOF metric stabilization; null disables upper clipping.
+
+foof_use_current_readout
+
+  If true, FOOF computes loss using the current trained readout held fixed.
+
+foof_adam_beta1
+
+  Adam beta1 for FOOF direction updates.
+
+foof_adam_beta2
+
+  Adam beta2 for FOOF direction updates.
+
+foof_adam_eps
+
+  Adam epsilon for FOOF direction updates.
+
+plotting
+
+  Nested plotting options consumed by analysis/plotting utilities.
+
+plotting.names
+
+  Metric names to plot if using plotting utilities.
+
+plotting.root_dir
+
+  Directory for plots.
+
+plotting.dpi
+
+  Plot DPI.
+
+plotting.format
+
+  Plot file format.
+
+metric_names
+
+  List of logger metric keys. Must include every key logged by train_rpm.py.

@@ -1,0 +1,104 @@
+# Base single-layer RPM config. Kernel sigma = 0.5. Feature normalization disabled.
+experiment_dir: ./runs/gradient_fixed_readout
+logger_filename: rpm_metrics.pt
+logger_run_meta_filename: rpm_metrics_run_meta.yaml
+num_trials: 1
+train_num_epochs: 50
+num_train_samples: 2000
+num_val_samples: 300
+num_test_samples: 500
+num_lags: 15
+prediction_horizon: 1
+embedding_size: 1
+wgn_var: 100.0
+test_ratio: 0.4
+output_dim:
+- 500
+alphas:
+- 0.1
+kernel_type: rbf
+kernel_sigma:
+- 0.5
+approx_method: full
+nystrom_m: 2000
+nystrom_mode: uniform
+nystrom_seed: 0
+chunk_size: 1500
+store_full_centers: true
+center_quant_thresh: null
+normalize_features: false
+metric_clamp: 1.0e-12
+metric_rank_eps: 1.0e-22
+metric_norm_type: Trace
+metric_norm_mult: 1.0
+metric_eps: 1.0e-16
+reg_param: 1.0e-07
+use_onehot_labels: false
+batch_size: 2000
+num_batches: 1
+effective_dim_eps: 1.0e-22
+nmse_eps: 1.0e-12
+dtype: float64
+device: cpu
+enable_epoch_print: true
+metric_update_rule: gradient_descent
+center_grads: false
+metric_gradient_objective: fixed_readout
+metric_gradient_optimizer: sgd
+metric_gradient_lrs: null
+metric_gradient_loss: mse
+metric_gradient_eps: 1.0e-12
+metric_gradient_project_psd: true
+metric_gradient_max_norm: 1.0
+metric_gradient_diag_load: 1.0e-08
+metric_gradient_use_current_readout: true
+metric_gradient_store_differentiable_readout: false
+metric_gradient_adam_beta1: 0.9
+metric_gradient_adam_beta2: 0.999
+metric_gradient_adam_eps: 1.0e-08
+foof_optimizer: sgd
+foof_lrs: null
+foof_gamma: 0.01
+foof_loss: mse
+foof_eps: 1.0e-12
+foof_covariance_normalize: true
+foof_factor_rank: null
+foof_max_direction_norm: null
+foof_project_psd: true
+foof_diag_load: 1.0e-08
+foof_eigenclip_max: null
+foof_use_current_readout: true
+foof_adam_beta1: 0.9
+foof_adam_beta2: 0.999
+foof_adam_eps: 1.0e-08
+plotting:
+  names: ['m_matrices','m_eigvals','mse_test','mse_train']
+  root_dir: runPlots
+  dpi: 300
+  format: png
+metric_names:
+- epoch
+- mse_train
+- mse_val
+- mse_test
+- nmse_train
+- nmse_val
+- nmse_test
+- target_align_train
+- target_align_val
+- target_align_test
+- excite_align_train
+- excite_align_val
+- excite_align_test
+- fisher_arith_train
+- fisher_arith_val
+- fisher_arith_test
+- fisher_geom_train
+- fisher_geom_val
+- fisher_geom_test
+- eff_dim_train
+- eff_dim_val
+- eff_dim_test
+- metric_matrices
+- weights
+- cond_num
