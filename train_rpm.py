@@ -75,7 +75,18 @@ def _prepare_runtime_config(config: Config) -> str:
     resolved_device = resolve_device(config.get("device", "auto"))
     config.device = resolved_device
 
-    base_experiment_dir = config.get("_base_experiment_dir", config.experiment_dir)
+    base_experiment_dir = config.get("_base_experiment_dir", None)
+    if base_experiment_dir is None:
+        current_experiment_dir = config.experiment_dir
+        if isinstance(current_experiment_dir, str):
+            basename = os.path.basename(os.path.normpath(current_experiment_dir))
+            if basename.startswith("device_"):
+                base_experiment_dir = os.path.dirname(current_experiment_dir)
+            else:
+                base_experiment_dir = current_experiment_dir
+        else:
+            base_experiment_dir = current_experiment_dir
+
     config._base_experiment_dir = base_experiment_dir
 
     if bool(config.get("use_device_subdir", False)):

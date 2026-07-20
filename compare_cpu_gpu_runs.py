@@ -37,10 +37,29 @@ DEFAULT_METRICS = [
 
 def _resolve_logger_path(path: str) -> str:
     if os.path.isdir(path):
-        candidate = os.path.join(path, "rpm_metrics.pt")
-        if os.path.exists(candidate):
-            return candidate
-        raise FileNotFoundError(f"No logger found in directory: {path}")
+        candidates = [
+            os.path.join(path, "rpm_metrics.pt"),
+            os.path.join(path, "logger.pt"),
+        ]
+
+        for candidate in candidates:
+            if os.path.exists(candidate):
+                return candidate
+
+        pt_files = sorted(
+            [
+                os.path.join(path, name)
+                for name in os.listdir(path)
+                if name.endswith(".pt")
+            ]
+        )
+        if pt_files:
+            return pt_files[0]
+
+        raise FileNotFoundError(
+            f"No logger found in directory: {path}. "
+            f"Contents: {os.listdir(path)}"
+        )
 
     if os.path.isfile(path):
         return path
