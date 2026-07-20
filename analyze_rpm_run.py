@@ -63,6 +63,7 @@ if sys.path[0] != _SCRIPT_DIR:
 
 from config_refac import Config
 from logger_refac import Logger
+from device_utils import resolve_device
 
 
 # =============================================================================
@@ -103,6 +104,12 @@ def _to_runtime_tensor(x, *, device: torch.device, dtype: torch.dtype) -> torch.
     if torch.is_tensor(x):
         return x.detach().to(device=device, dtype=dtype)
     return torch.as_tensor(x, device=device, dtype=dtype)
+
+
+def _resolve_runtime_device(config: Config, device_override: Optional[str] = None) -> str:
+    resolved_device = resolve_device(device_override or config.get("device", "auto"))
+    config.device = resolved_device
+    return resolved_device
 
 
 def _resolve_logger_path(config: Config, logger_path: Optional[str]) -> str:
@@ -312,6 +319,7 @@ def load_reconstructed_run(
     """
     if config_path is not None:
         config = Config.from_file(config_path)
+        _resolve_runtime_device(config, device_override=device_override)
         resolved_logger_path = _resolve_logger_path(config, logger_path)
         logger = Logger.load(resolved_logger_path, map_location="cpu")
     else:
@@ -322,7 +330,9 @@ def load_reconstructed_run(
         resolved_logger_path = logger_path
 
     if device_override is not None:
-        config.device = device_override
+        _resolve_runtime_device(config, device_override=device_override)
+    else:
+        _resolve_runtime_device(config)
 
     if trial_idx < 0 or trial_idx >= len(logger.data["metric_matrices"]):
         raise IndexError(

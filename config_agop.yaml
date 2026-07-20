@@ -39,7 +39,8 @@ num_batches: 1
 effective_dim_eps: 1.0e-22
 nmse_eps: 1.0e-12
 dtype: float64
-device: cpu
+device: auto
+use_device_subdir: true
 enable_epoch_print: true
 metric_update_rule: agop
 center_grads: false

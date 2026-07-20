@@ -63,11 +63,31 @@ from util_refac import (
     normalized_mse,
     target_alignment,
 )
+from device_utils import resolve_device
 
 
 # =============================================================================
 # Data / model helpers
 # =============================================================================
+
+def _prepare_runtime_config(config: Config) -> str:
+    """Resolve the requested device and optionally route output to a device subdir."""
+    resolved_device = resolve_device(config.get("device", "auto"))
+    config.device = resolved_device
+
+    base_experiment_dir = config.get("_base_experiment_dir", config.experiment_dir)
+    config._base_experiment_dir = base_experiment_dir
+
+    if bool(config.get("use_device_subdir", False)):
+        device_label = resolved_device.replace(":", "_")
+        target_dir = os.path.join(base_experiment_dir, f"device_{device_label}")
+        if os.path.normpath(config.experiment_dir) != os.path.normpath(target_dir):
+            config.experiment_dir = target_dir
+    else:
+        config.experiment_dir = base_experiment_dir
+
+    return resolved_device
+
 
 def make_mackey_glass_splits(
     config: Config,
@@ -77,6 +97,8 @@ def make_mackey_glass_splits(
     """
     Create train/val/test splits matching the old Mackey-Glass setup.
     """
+    device = torch.device(_prepare_runtime_config(config))
+
     system_info = {
         "System": "MackeyGlassdB",
         "Ntest": config.num_test_samples,
@@ -101,8 +123,6 @@ def make_mackey_glass_splits(
 
     x_train = x_all[:-config.num_val_samples]
     y_train = y_all[:-config.num_val_samples]
-
-    device = torch.device(config.device)
 
     x_train = torch.as_tensor(x_train, dtype=config.dtype, device=device)
     y_train = torch.as_tensor(y_train, dtype=config.dtype, device=device).reshape(-1)
@@ -266,6 +286,8 @@ def make_rpm(
     This function only creates the model. It does not set centers, build
     spectral features, train the readout, compute metrics, or update the metric.
     """
+    _prepare_runtime_config(config)
+
     config.require(
         "device",
         "dtype",
@@ -1316,6 +1338,7 @@ def run_experiment(config: Config) -> Logger:
     """
     Run all trials and save the logger after each trial.
     """
+    _prepare_runtime_config(config)
     os.makedirs(config.experiment_dir, exist_ok=True)
 
     logger = Logger.from_config(

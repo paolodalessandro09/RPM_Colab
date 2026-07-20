@@ -1,9 +1,8 @@
-# Base single-layer RPM config. Kernel sigma = 0.5. Feature normalization disabled.
-experiment_dir: ./runs/gradient_fixed_readout
+experiment_dir: ./runs/agop\device_cpu
 logger_filename: rpm_metrics.pt
 logger_run_meta_filename: rpm_metrics_run_meta.yaml
 num_trials: 1
-train_num_epochs: 50
+train_num_epochs: 1
 num_train_samples: 2000
 num_val_samples: 300
 num_test_samples: 500
@@ -39,10 +38,10 @@ num_batches: 1
 effective_dim_eps: 1.0e-22
 nmse_eps: 1.0e-12
 dtype: float64
-device: auto
+device: cpu
 use_device_subdir: true
-enable_epoch_print: true
-metric_update_rule: gradient_descent
+enable_epoch_print: false
+metric_update_rule: agop
 center_grads: false
 metric_gradient_objective: fixed_readout
 metric_gradient_optimizer: sgd
@@ -73,7 +72,11 @@ foof_adam_beta1: 0.9
 foof_adam_beta2: 0.999
 foof_adam_eps: 1.0e-08
 plotting:
-  names: ['m_matrices','m_eigvals','mse_test','mse_train']
+  names:
+  - m_matrices
+  - m_eigvals
+  - mse_test
+  - mse_train
   root_dir: runPlots
   dpi: 300
   format: png
@@ -103,3 +106,6 @@ metric_names:
 - metric_matrices
 - weights
 - cond_num
+source_config_path: config_agop.yaml
+_base_experiment_dir: ./runs/agop
+config_class: Config
